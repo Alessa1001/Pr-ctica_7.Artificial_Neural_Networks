@@ -15,7 +15,8 @@ g = zeros(size(z));
 
 
 
-
+%Función Sigmoid gradient
+g  = sigmoid(z).*(1-sigmoid(z));
 
 
 

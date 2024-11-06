@@ -65,22 +65,48 @@ Theta2_grad = zeros(size(Theta2));
 
 
 
+Y = eye(num_labels)(y,:);  % Convierte y en una matriz binaria sin bucle
 
+% ====================== FEEDFORWARD Y CALCULO DEL COSTO ======================
 
+% Agrega el término de sesgo a la capa de entrada
+a1 = [ones(m, 1) X];
+z2 = a1 * Theta1';
+a2 = [ones(size(z2, 1), 1) sigmoid(z2)];
+z3 = a2 * Theta2';
+a3 = sigmoid(z3); % a3 es la hipótesis h(x)
 
+% Se calcula el costo sin regularización
+J = (1 / m) * sum(sum((-Y) .* log(a3) - (1 - Y) .* log(1 - a3)));
 
+% ====================== REGULARIZACIÓN DEL COSTO ======================
 
+% Se calcula la penalización excluyendo el término de sesgo en Theta1 y Theta2
+penalizacion = (lambda / (2 * m)) * (sum(sum(Theta1(:, 2:end).^2)) + sum(sum(Theta2(:, 2:end).^2)));
 
+% Costo total con regularización
+J = J + penalizacion;
 
+% ====================== BACKPROPAGATION PARA LOS GRADIENTES ======================
 
+% Se calcula los errores en las capas o sea errores de retropropagación
+sigma3 = a3 - Y;
+sigma2 = (sigma3 * Theta2) .* sigmoidGradient([ones(size(z2, 1), 1) z2]);
+sigma2 = sigma2(:, 2:end); % Excluir el término de sesgo
 
+% Se acumulan las gradientes no regularizadas
+delta_1 = sigma2' * a1;
+delta_2 = sigma3' * a2;
 
+% ====================== REGULARIZACIÓN DE LOS GRADIENTES ======================
 
+% Crea matrices de regularización para Theta1 y Theta2, excluyendo el sesgo
+reg1 = (lambda / m) * [zeros(size(Theta1, 1), 1) Theta1(:, 2:end)];
+reg2 = (lambda / m) * [zeros(size(Theta2, 1), 1) Theta2(:, 2:end)];
 
-
-
-
-% -------------------------------------------------------------
+% Cálculo de los gradientes finales
+Theta1_grad = delta_1 / m + reg1;
+Theta2_grad = delta_2 / m + reg2;
 
 % =========================================================================
 
